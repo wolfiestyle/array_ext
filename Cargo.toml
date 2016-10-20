@@ -1,0 +1,6 @@
+[package]
+name = "array_ext"
+version = "0.1.0"
+authors = ["darkstalker <slayerbeast@gmail.com>"]
+
+[dependencies]
