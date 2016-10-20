@@ -21,36 +21,35 @@ pub trait Array<T>
 // for arrays with 1+ elements
 macro_rules! impl_array
 {
-    (@replace $t:tt $sub:expr) => ($sub);
-
-    (@count $($e:expr)*) => { 0usize $(+ impl_array!(@replace $e 1usize))* };
-
-    ($($idx:expr)+) => {
-        impl <T> ::Array<T> for [T; impl_array!(@count $($idx)+)]
+    (@do_impl $count:tt $($idx:tt)+) => {
+        impl<T> $crate::Array<T> for [T; $count]
         {
-            fn len(&self) -> usize { impl_array!(@count $($idx)+) }
+            fn len(&self) -> usize { $count }
             fn is_empty(&self) -> bool { false }
             fn first(&self) -> Option<&T> { Some(&self[0]) }
             fn first_mut(&mut self) -> Option<&mut T> { Some(&mut self[0]) }
-            fn last(&self) -> Option<&T> { Some(&self[impl_array!(@count $($idx)+) - 1]) }
-            fn last_mut(&mut self) -> Option<&mut T> { Some(&mut self[impl_array!(@count $($idx)+) - 1]) }
-            fn get(&self, index: usize) -> Option<&T> { if index < impl_array!(@count $($idx)+) { Some(&self[index]) } else { None } }
-            fn get_mut(&mut self, index: usize) -> Option<&mut T> { if index < impl_array!(@count $($idx)+) { Some(&mut self[index]) } else { None } }
+            fn last(&self) -> Option<&T> { Some(&self[$count - 1]) }
+            fn last_mut(&mut self) -> Option<&mut T> { Some(&mut self[$count - 1]) }
+            fn get(&self, index: usize) -> Option<&T> { if index < $count { Some(&self[index]) } else { None } }
+            fn get_mut(&mut self, index: usize) -> Option<&mut T> { if index < $count { Some(&mut self[index]) } else { None } }
             fn as_ptr(&self) -> *const T { &self[0] }
             fn as_mut_ptr(&mut self) -> *mut T { &mut self[0] }
             fn as_slice(&self) -> &[T] { self }
             fn as_mut_slice(&mut self) -> &mut [T] { self }
-            fn map<F>(self, mut f: F) -> Self where T: Copy, F: FnMut(T) -> T { [$(f(self[$idx])),+] }
-            fn fold<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $(acc = f(acc, self[$idx]);)+ acc }
+            fn map<F>(self, mut f: F) -> Self where T: Copy, F: FnMut(T) -> T { [$( f(self[$count - $idx - 1]) ),+] }
+            fn fold<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$count - $idx - 1]); )+ acc }
         }
     };
+
+    ($count:tt $idx:tt) => { impl_array!(@do_impl $count $idx); };
+    ($head:tt $($tail:tt)+) => { impl_array!(@do_impl $head $($tail)+); impl_array!($($tail)+); };
 }
 
-// workaround to not being able to cast `&mut [T; 0]` to `*mut T` directly
-fn get_mut_ptr<T>(a: &mut [T; 0]) -> *mut T { a.as_mut_ptr() }
+// implement sizes from 32 to 1
+impl_array!(32 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0);
 
 // special case for the empty array
-impl <T> Array<T> for [T; 0]
+impl<T> Array<T> for [T; 0]
 {
     fn len(&self) -> usize { 0 }
     fn is_empty(&self) -> bool { true }
@@ -68,23 +67,8 @@ impl <T> Array<T> for [T; 0]
     fn fold<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
 }
 
-impl_array!(0);
-impl_array!(0 1);
-impl_array!(0 1 2);
-impl_array!(0 1 2 3);
-impl_array!(0 1 2 3 4);
-impl_array!(0 1 2 3 4 5);
-impl_array!(0 1 2 3 4 5 6);
-impl_array!(0 1 2 3 4 5 6 7);
-impl_array!(0 1 2 3 4 5 6 7 8);
-impl_array!(0 1 2 3 4 5 6 7 8 9);
-impl_array!(0 1 2 3 4 5 6 7 8 9 10);
-impl_array!(0 1 2 3 4 5 6 7 8 9 10 11);
-impl_array!(0 1 2 3 4 5 6 7 8 9 10 11 12);
-impl_array!(0 1 2 3 4 5 6 7 8 9 10 11 12 13);
-impl_array!(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14);
-impl_array!(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15);
-impl_array!(0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16);
+// workaround to not being able to cast `&mut [T; 0]` to `*mut T` directly
+fn get_mut_ptr<T>(a: &mut [T; 0]) -> *mut T { a.as_mut_ptr() }
 
 
 #[cfg(test)]
