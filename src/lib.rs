@@ -1,23 +1,57 @@
+//! Extra functionality for Rust arrays.
+
+/// Generic array type.
+///
+/// This trait allows passing arrays by value in a generic way without turning them into slices,
+/// so the functions get monomorphized for a specific size.
+///
+/// # Examples
+/// ```
+/// use array_ext::Array;
+///
+/// fn average<T: Array<f32>>(arr: T) -> f32
+/// {
+///     let n = arr.len() as f32;
+///     arr.foldl(0.0, |acc, val| acc + val) / n
+/// }
+///
+/// assert_eq!(average([8.96, 3.14, 17.9]), 10.0);
+/// ```
 pub trait Array<T>
 {
-    // taken from the slice impl
+    /// Returns the number of elements in the array.
     fn len(&self) -> usize;
+    /// Returns true if the array has a length of 0
     fn is_empty(&self) -> bool;
+    /// Returns the first element of the array, or `None` if it is empty.
     fn first(&self) -> Option<&T>;
+    /// Returns a mutable pointer to the first element of the array, or `None` if it is empty.
     fn first_mut(&mut self) -> Option<&mut T>;
+    /// Returns the last element of the array, or `None` if it is empty.
     fn last(&self) -> Option<&T>;
+    /// Returns a mutable pointer to the last element of the array, or `None` if it is empty.
     fn last_mut(&mut self) -> Option<&mut T>;
+    /// Returns the element of an array at the given index, or `None` if the index is out of bounds.
     fn get(&self, index: usize) -> Option<&T>;
+    /// Returns a mutable reference to the element at the given index, or `None` if the index is out of bounds.
     fn get_mut(&mut self, index: usize) -> Option<&mut T>;
+    /// Returns an raw pointer to the array's buffer.
     fn as_ptr(&self) -> *const T;
+    /// Returns an unsafe mutable pointer to the array's buffer.
     fn as_mut_ptr(&mut self) -> *mut T;
-    // convenience methods
+    /// Extracts a slice containing the entire array.
     fn as_slice(&self) -> &[T];
+    /// Extracts a mutable slice of the entire array.
     fn as_mut_slice(&mut self) -> &mut [T];
+    /// Takes a closure and creates a new array by calling that closure on each element.
     fn map<F>(self, f: F) -> Self where T: Copy, F: FnMut(T) -> T;
+    /// Applies a function over the entire array, producing a single final value.
     fn foldl<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
+    /// Applies a function over the entire array (in reverse order), producing a single final value.
     fn foldr<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
+    /// Creates a new array using the provided closure.
     fn from_fn<F>(f: F) -> Self where F: FnMut(usize) -> T;
+    /// Creates an array by extracting elements from the provided iterator.
     fn from_iter<I: Iterator<Item=T>>(iter: I) -> Option<Self> where Self: Sized;
 }
 
