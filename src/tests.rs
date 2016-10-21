@@ -101,4 +101,11 @@ fn constructors()
     let mut n = 1;
     let arr: [usize; 5] = Array::from_fn(|i| { n *= 2; i + n });
     assert_eq!(arr, [2, 5, 10, 19, 36]);
+
+    let arr: [usize; 5] = Array::from_iter(1..).unwrap();
+    assert_eq!(arr, [1, 2, 3, 4, 5]);
+
+    let iter = (1..).filter(|n| n % 2 == 0).zip("foobar".chars());
+    let arr: [(i32, char); 6] = Array::from_iter(iter).unwrap();
+    assert_eq!(arr, [(2, 'f'), (4, 'o'), (6, 'o'), (8, 'b'), (10, 'a'), (12, 'r')]);
 }

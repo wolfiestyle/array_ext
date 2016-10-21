@@ -18,11 +18,14 @@ pub trait Array<T>
     fn foldl<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
     fn foldr<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
     fn from_fn<F>(f: F) -> Self where F: FnMut(usize) -> T;
+    fn from_iter<I: Iterator<Item=T>>(iter: I) -> Option<Self> where Self: Sized;
 }
 
 // for arrays with 1+ elements
 macro_rules! impl_array
 {
+    (@replace $a:expr, $sub:expr) => ($sub);
+
     (@do_impl $count:tt $($idx:tt)+) => {
         impl<T> $crate::Array<T> for [T; $count]
         {
@@ -42,6 +45,10 @@ macro_rules! impl_array
             fn foldl<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$count - $idx - 1]); )+ acc }
             fn foldr<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$idx]); )+ acc }
             fn from_fn<F>(mut f: F) -> Self where F: FnMut(usize) -> T { [$( f($count - $idx - 1) ),+] }
+            fn from_iter<I: Iterator<Item=T>>(mut iter: I) -> Option<Self>
+            {
+                Some([$( impl_array!(@replace $idx, match iter.next() { Some(v) => v, None => return None }) ),+])
+            }
         }
     };
 
@@ -71,6 +78,7 @@ impl<T> Array<T> for [T; 0]
     fn foldl<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
     fn foldr<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
     fn from_fn<F>(_f: F) -> Self where F: FnMut(usize) -> T { [] }
+    fn from_iter<I: Iterator<Item=T>>(_iter: I) -> Option<Self> { Some([]) }
 }
 
 // workaround to not being able to cast `&mut [T; 0]` to `*mut T` directly
