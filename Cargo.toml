@@ -2,5 +2,11 @@
 name = "array_ext"
 version = "0.1.0"
 authors = ["darkstalker <slayerbeast@gmail.com>"]
+description = "Extra functionality for Rust arrays"
+documentation = "https://docs.rs/array_ext"
+repository = "https://github.com/darkstalker/array_ext"
+readme = "README.md"
+keywords = ["array", "generic", "extension"]
+license = "MIT"
 
 [dependencies]

@@ -2,9 +2,11 @@
 
 Extra functionality for Rust arrays.
 
+[Documentation](https://docs.rs/array_ext)
+
 ## Examples
 
-The trait `Array` provides array generics (monomorphized, stack only):
+The trait `Array` provides fixed-size array generics:
 
 ```rust
 use array_ext::Array;
@@ -18,4 +20,4 @@ fn average<T: Array<f32>>(arr: T) -> f32
 assert_eq!(average([8.96, 3.14, 17.9]), 10.0);
 ```
 
-Currently implemented for sizes 0 to 32. It's meant to be a workaround for the lack of integer generics.
+Currently implemented for [T; N] where N: 0 to 32. It's meant to be a workaround for the lack of integer generics.
