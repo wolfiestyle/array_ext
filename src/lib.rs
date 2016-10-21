@@ -15,7 +15,8 @@ pub trait Array<T>
     fn as_slice(&self) -> &[T];
     fn as_mut_slice(&mut self) -> &mut [T];
     fn map<F>(self, f: F) -> Self where T: Copy, F: FnMut(T) -> T;
-    fn fold<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
+    fn foldl<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
+    fn foldr<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
     fn from_fn<F>(f: F) -> Self where F: FnMut(usize) -> T;
 }
 
@@ -38,7 +39,8 @@ macro_rules! impl_array
             fn as_slice(&self) -> &[T] { self }
             fn as_mut_slice(&mut self) -> &mut [T] { self }
             fn map<F>(self, mut f: F) -> Self where T: Copy, F: FnMut(T) -> T { [$( f(self[$count - $idx - 1]) ),+] }
-            fn fold<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$count - $idx - 1]); )+ acc }
+            fn foldl<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$count - $idx - 1]); )+ acc }
+            fn foldr<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$idx]); )+ acc }
             fn from_fn<F>(mut f: F) -> Self where F: FnMut(usize) -> T { [$( f($count - $idx - 1) ),+] }
         }
     };
@@ -66,7 +68,8 @@ impl<T> Array<T> for [T; 0]
     fn as_slice(&self) -> &[T] { self }
     fn as_mut_slice(&mut self) -> &mut [T] { self }
     fn map<F>(self, _f: F) -> Self where T: Copy, F: FnMut(T) -> T { self }
-    fn fold<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
+    fn foldl<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
+    fn foldr<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
     fn from_fn<F>(_f: F) -> Self where F: FnMut(usize) -> T { [] }
 }
 

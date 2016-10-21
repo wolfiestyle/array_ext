@@ -20,7 +20,7 @@ fn methods_empty()
     let arr: [i32; 0] = [];
     test_empty(arr);
     assert_eq!(arr.map(|a| a * 2), []);
-    assert_eq!(arr.fold(0, |a, n| a + n), 0);
+    assert_eq!(arr.foldl(0, |a, n| a + n), 0);
 }
 
 fn test_arr<T: Array<V>, V: PartialEq + Debug>(mut arr: T, len: usize, mut first: V, mut last: V, mut second: V)
@@ -43,12 +43,13 @@ fn methods()
     let arr = [1, 2, 3, 4];
     test_arr(arr, 4, 1, 4, 2);
     assert_eq!(arr.map(|a| a * 2), [2, 4, 6, 8]);
-    assert_eq!(arr.fold(0, |a, n| a + n), 10);
+    assert_eq!(arr.foldl(0, |a, n| a + n), 10);
 
     let arr = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
     test_arr(arr, 7, 'c', 'b', 'd');
     assert_eq!(arr.map(|a| a.to_uppercase().next().unwrap()), ['C', 'D', 'E', 'F', 'G', 'A', 'B']);
-    assert_eq!(arr.fold(String::new(), |mut a, c| { a.push(c); a }), "cdefgab");
+    assert_eq!(arr.foldl(String::new(), |mut a, c| { a.push(c); a }), "cdefgab");
+    assert_eq!(arr.foldr(String::new(), |mut a, c| { a.push(c); a }), "bagfedc");
 }
 
 fn sum<T, V>(arr: T, val: V) -> T
@@ -60,7 +61,7 @@ fn sum<T, V>(arr: T, val: V) -> T
 fn avg<T: Array<f32>>(arr: T) -> f32
 {
     let n = arr.len() as f32;
-    arr.fold(0.0, |a, n| a + n) / n
+    arr.foldl(0.0, |a, n| a + n) / n
 }
 
 #[test]
