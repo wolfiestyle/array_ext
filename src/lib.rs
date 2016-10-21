@@ -16,6 +16,7 @@ pub trait Array<T>
     fn as_mut_slice(&mut self) -> &mut [T];
     fn map<F>(self, f: F) -> Self where T: Copy, F: FnMut(T) -> T;
     fn fold<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
+    fn from_fn<F>(f: F) -> Self where F: FnMut(usize) -> T;
 }
 
 // for arrays with 1+ elements
@@ -38,6 +39,7 @@ macro_rules! impl_array
             fn as_mut_slice(&mut self) -> &mut [T] { self }
             fn map<F>(self, mut f: F) -> Self where T: Copy, F: FnMut(T) -> T { [$( f(self[$count - $idx - 1]) ),+] }
             fn fold<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$count - $idx - 1]); )+ acc }
+            fn from_fn<F>(mut f: F) -> Self where F: FnMut(usize) -> T { [$( f($count - $idx - 1) ),+] }
         }
     };
 
@@ -65,6 +67,7 @@ impl<T> Array<T> for [T; 0]
     fn as_mut_slice(&mut self) -> &mut [T] { self }
     fn map<F>(self, _f: F) -> Self where T: Copy, F: FnMut(T) -> T { self }
     fn fold<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
+    fn from_fn<F>(_f: F) -> Self where F: FnMut(usize) -> T { [] }
 }
 
 // workaround to not being able to cast `&mut [T; 0]` to `*mut T` directly

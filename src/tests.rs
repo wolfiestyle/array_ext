@@ -90,3 +90,14 @@ fn slice()
     v.extend_from_slice(arr.as_slice());
     assert_eq!(arr, &v[..]);
 }
+
+#[test]
+fn constructors()
+{
+    let arr: [usize; 5] = Array::from_fn(|i| i);
+    assert_eq!(arr, [0, 1, 2, 3, 4]);
+
+    let mut n = 1;
+    let arr: [usize; 5] = Array::from_fn(|i| { n *= 2; i + n });
+    assert_eq!(arr, [2, 5, 10, 19, 36]);
+}
