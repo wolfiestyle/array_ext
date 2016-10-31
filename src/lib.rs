@@ -43,8 +43,8 @@ pub trait Array<T>
     fn as_slice(&self) -> &[T];
     /// Extracts a mutable slice of the entire array.
     fn as_mut_slice(&mut self) -> &mut [T];
-    /// Takes a closure and creates a new array by calling that closure on each element.
-    fn map<F>(self, f: F) -> Self where T: Copy, F: FnMut(T) -> T;
+    /// Takes a `FnMut(T) -> T` closure and creates a new array by calling that closure on each element.
+    fn map_<F>(self, f: F) -> Self where T: Copy, F: FnMut(T) -> T;
     /// Applies a function over the entire array, producing a single final value.
     fn foldl<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
     /// Applies a function over the entire array (in reverse order), producing a single final value.
@@ -75,7 +75,7 @@ macro_rules! impl_array
             fn as_mut_ptr(&mut self) -> *mut T { &mut self[0] }
             fn as_slice(&self) -> &[T] { self }
             fn as_mut_slice(&mut self) -> &mut [T] { self }
-            fn map<F>(self, mut f: F) -> Self where T: Copy, F: FnMut(T) -> T { [$( f(self[$count - $idx - 1]) ),+] }
+            fn map_<F>(self, mut f: F) -> Self where T: Copy, F: FnMut(T) -> T { [$( f(self[$count - $idx - 1]) ),+] }
             fn foldl<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$count - $idx - 1]); )+ acc }
             fn foldr<A, F>(self, mut acc: A, mut f: F) -> A where T: Copy, F: FnMut(A, T) -> A { $( acc = f(acc, self[$idx]); )+ acc }
             fn from_fn<F>(mut f: F) -> Self where F: FnMut(usize) -> T { [$( f($count - $idx - 1) ),+] }
@@ -108,7 +108,7 @@ impl<T> Array<T> for [T; 0]
     fn as_mut_ptr(&mut self) -> *mut T { get_mut_ptr(self) }
     fn as_slice(&self) -> &[T] { self }
     fn as_mut_slice(&mut self) -> &mut [T] { self }
-    fn map<F>(self, _f: F) -> Self where T: Copy, F: FnMut(T) -> T { self }
+    fn map_<F>(self, _f: F) -> Self where T: Copy, F: FnMut(T) -> T { self }
     fn foldl<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
     fn foldr<A, F>(self, acc: A, _f: F) -> A where T: Copy, F: FnMut(A, T) -> A { acc }
     fn from_fn<F>(_f: F) -> Self where F: FnMut(usize) -> T { [] }
@@ -118,6 +118,8 @@ impl<T> Array<T> for [T; 0]
 // workaround to not being able to cast `&mut [T; 0]` to `*mut T` directly
 fn get_mut_ptr<T>(a: &mut [T; 0]) -> *mut T { a.as_mut_ptr() }
 
+pub mod sized;
+pub use sized::*;
 
 #[cfg(test)]
 mod tests;

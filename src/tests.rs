@@ -1,4 +1,4 @@
-use super::Array;
+use super::*;
 use std::fmt::Debug;
 use std::ops::Add;
 
@@ -19,7 +19,7 @@ fn methods_empty()
 {
     let arr: [i32; 0] = [];
     test_empty(arr);
-    assert_eq!(arr.map(|a| a * 2), []);
+    assert_eq!(arr.map_(|a| a * 2), []);
     assert_eq!(arr.foldl(0, |a, n| a + n), 0);
 }
 
@@ -42,12 +42,12 @@ fn methods()
 {
     let arr = [1, 2, 3, 4];
     test_arr(arr, 4, 1, 4, 2);
-    assert_eq!(arr.map(|a| a * 2), [2, 4, 6, 8]);
+    assert_eq!(arr.map_(|a| a * 2), [2, 4, 6, 8]);
     assert_eq!(arr.foldl(0, |a, n| a + n), 10);
 
     let arr = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
     test_arr(arr, 7, 'c', 'b', 'd');
-    assert_eq!(arr.map(|a| a.to_uppercase().next().unwrap()), ['C', 'D', 'E', 'F', 'G', 'A', 'B']);
+    assert_eq!(arr.map_(|a| a.to_uppercase().next().unwrap()), ['C', 'D', 'E', 'F', 'G', 'A', 'B']);
     assert_eq!(arr.foldl(String::new(), |mut a, c| { a.push(c); a }), "cdefgab");
     assert_eq!(arr.foldr(String::new(), |mut a, c| { a.push(c); a }), "bagfedc");
 }
@@ -55,7 +55,7 @@ fn methods()
 fn sum<T, V>(arr: T, val: V) -> T
     where T: Array<V>, V: Add<Output=V> + Copy
 {
-    arr.map(|n| n + val)
+    arr.map_(|n| n + val)
 }
 
 fn avg<T: Array<f32>>(arr: T) -> f32
@@ -108,4 +108,16 @@ fn constructors()
     let iter = (1..).filter(|n| n % 2 == 0).zip("foobar".chars());
     let arr: [(i32, char); 6] = Array::from_iter(iter).unwrap();
     assert_eq!(arr, [(2, 'f'), (4, 'o'), (6, 'o'), (8, 'b'), (10, 'a'), (12, 'r')]);
+}
+
+#[test]
+fn sized()
+{
+    let arr = [1, 2, 3];
+    assert_eq!(arr.map(|a| a as f32 / 2.0), [0.5, 1.0, 1.5]);
+    assert_eq!(arr.zip([30, 20, 10], |a, b| a + b), [31, 22, 13]);
+    assert_eq!(arr.zip(['a', 'b', 'c'], |a, b| (a, b)), [(1, 'a'), (2, 'b'), (3, 'c')]);
+
+    let arr = ["foo", "asdf", "a", "very long string"];
+    assert_eq!(arr.map(|s| s.len()), [3, 4, 1, 16]);
 }
