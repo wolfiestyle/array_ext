@@ -44,13 +44,13 @@ pub trait Array<T>
     /// Extracts a mutable slice of the entire array.
     fn as_mut_slice(&mut self) -> &mut [T];
     /// Takes a `FnMut(T) -> T` closure and creates a new array by calling that closure on each element.
-    fn map_<F>(self, f: F) -> Self where T: Copy, F: FnMut(T) -> T;
+    fn map_<F>(self, f: F) -> Self where T: Copy, F: FnMut(T) -> T, Self: Sized;
     /// Applies a function over the entire array, producing a single final value.
-    fn foldl<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
+    fn foldl<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A, Self: Sized;
     /// Applies a function over the entire array (in reverse order), producing a single final value.
-    fn foldr<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A;
+    fn foldr<A, F>(self, acc: A, f: F) -> A where T: Copy, F: FnMut(A, T) -> A, Self: Sized;
     /// Creates a new array using the provided closure.
-    fn from_fn<F>(f: F) -> Self where F: FnMut(usize) -> T;
+    fn from_fn<F>(f: F) -> Self where F: FnMut(usize) -> T, Self: Sized;
     /// Creates an array by extracting elements from the provided iterator.
     fn from_iter<I: Iterator<Item=T>>(iter: I) -> Option<Self> where Self: Sized;
 }

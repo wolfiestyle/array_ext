@@ -121,3 +121,14 @@ fn sized()
     let arr = ["foo", "asdf", "a", "very long string"];
     assert_eq!(arr.map(|s| s.len()), [3, 4, 1, 16]);
 }
+
+fn sum_boxed(arr: Box<Array<i32>>) -> i32
+{
+    (0 .. arr.len()).fold(0, |a, i| a + arr.get(i).unwrap())
+}
+
+#[test]
+fn object_safe()
+{
+    assert_eq!(sum_boxed(Box::new([1, 3, 5, 7])), 16);
+}
