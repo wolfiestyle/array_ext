@@ -122,7 +122,7 @@ fn sized()
     assert_eq!(arr.map(|s| s.len()), [3, 4, 1, 16]);
 }
 
-fn sum_boxed(arr: Box<Array<i32>>) -> i32
+fn sum_boxed(arr: Box<dyn Array<i32>>) -> i32
 {
     (0 .. arr.len()).fold(0, |a, i| a + arr.get(i).unwrap())
 }
