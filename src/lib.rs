@@ -16,7 +16,7 @@ use seq_macro::seq;
 ///     arr.foldl(0.0, |acc, val| acc + val) / n
 /// }
 ///
-/// assert_eq!(average([8.96, 3.14, 17.9]), 10.0);
+/// assert!((average([8.96, 3.14, 17.9]) - 10.0).abs() < f32::EPSILON);
 /// ```
 pub trait Array<T> {
     /// Returns the number of elements in the array.
