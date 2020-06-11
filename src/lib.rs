@@ -1,4 +1,5 @@
 //! Extra functionality for Rust arrays.
+use seq_macro::seq;
 
 /// Generic array type.
 ///
@@ -57,14 +58,12 @@ pub trait Array<T> {
     /// Takes a `FnMut(T) -> T` closure and creates a new array by calling that closure on each element.
     fn map_<F>(self, f: F) -> Self
     where
-        T: Copy,
         F: FnMut(T) -> T,
         Self: Sized;
 
     /// Applies a function over the entire array, producing a single final value.
     fn foldl<A, F>(self, acc: A, f: F) -> A
     where
-        T: Copy,
         F: FnMut(A, T) -> A,
         Self: Sized;
 
@@ -91,7 +90,7 @@ pub trait Array<T> {
 macro_rules! impl_array {
     (@replace $a:expr, $sub:expr) => ($sub);
 
-    (@do_impl $count:tt $($idx:tt)+) => {
+    (@do_impl $count:expr , $($var:ident $idx:expr),+) => {
         impl<T> $crate::Array<T> for [T; $count] {
             fn len(&self) -> usize { $count }
 
@@ -123,50 +122,53 @@ macro_rules! impl_array {
 
             fn map_<F>(self, mut f: F) -> Self
             where
-                T: Copy, F: FnMut(T) -> T
+                F: FnMut(T) -> T
             {
-                [$( f(self[$count - $idx - 1]) ),+]
+                let [$($var),*] = self;
+                [$( f($var) ),+]
             }
 
             fn foldl<A, F>(self, mut acc: A, mut f: F) -> A
             where
-                T: Copy, F: FnMut(A, T) -> A
+                F: FnMut(A, T) -> A
             {
-                $( acc = f(acc, self[$count - $idx - 1]); )+ acc
+                let [$($var),*] = self;
+                $( acc = f(acc, $var); )+
+                acc
             }
 
             fn foldr<A, F>(self, mut acc: A, mut f: F) -> A
             where
                 T: Copy, F: FnMut(A, T) -> A
             {
-                $( acc = f(acc, self[$idx]); )+ acc
+                $( acc = f(acc, self[$count - $idx - 1]); )+ acc
             }
 
             fn from_fn<F>(mut f: F) -> Self
             where
                 F: FnMut(usize) -> T
             {
-                [$( f($count - $idx - 1) ),+]
+                [$( f($idx) ),+]
             }
 
             fn from_iter<I: Iterator<Item=T>>(mut iter: I) -> Option<Self> {
-                Some([$( impl_array!(@replace $idx, match iter.next() { Some(v) => v, None => return None }) ),+])
+                Some([$(impl_array!(@replace $idx, match iter.next() { Some(v) => v, None => return None }) ),+])
             }
         }
     };
 
-    ($count:tt $idx:tt) => {
-        impl_array!(@do_impl $count $idx);
+    ($var:ident $idx:expr , $($tvar:ident $tidx:expr ,)* ; $($avar:ident $aidx:expr),*) => {
+        impl_array!(@do_impl $idx, $($avar $aidx),*);
+        impl_array!($($tvar $tidx,)* ; $($avar $aidx,)* $var $idx);
     };
 
-    ($head:tt $($tail:tt)+) => {
-        impl_array!(@do_impl $head $($tail)+);
-        impl_array!($($tail)+);
-    };
+    (; $($avar:ident $aidx:expr),*) => ();
 }
 
-// implement sizes from 32 to 1
-impl_array!(32 31 30 29 28 27 26 25 24 23 22 21 20 19 18 17 16 15 14 13 12 11 10 9 8 7 6 5 4 3 2 1 0);
+// implement sizes from 1 to 32
+seq!(N in 1..=32 {
+    impl_array!(#(a#N N,)* ; a0 0);
+});
 
 // special case for the empty array
 impl<T> Array<T> for [T; 0] {
@@ -220,7 +222,6 @@ impl<T> Array<T> for [T; 0] {
 
     fn map_<F>(self, _f: F) -> Self
     where
-        T: Copy,
         F: FnMut(T) -> T,
     {
         self
@@ -228,7 +229,6 @@ impl<T> Array<T> for [T; 0] {
 
     fn foldl<A, F>(self, acc: A, _f: F) -> A
     where
-        T: Copy,
         F: FnMut(A, T) -> A,
     {
         acc
