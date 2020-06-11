@@ -80,7 +80,7 @@ pub trait Array<T> {
         Self: Sized;
 
     /// Creates an array by extracting elements from the provided iterator.
-    fn from_iter<I: Iterator<Item = T>>(iter: I) -> Option<Self>
+    fn from_iter(iter: impl Iterator<Item = T>) -> Option<Self>
     where
         Self: Sized;
 }
@@ -150,8 +150,8 @@ macro_rules! impl_array {
                 [$( f($idx) ),+]
             }
 
-            fn from_iter<I: Iterator<Item=T>>(mut iter: I) -> Option<Self> {
-                Some([$(impl_array!(@replace $idx, match iter.next() { Some(v) => v, None => return None }) ),+])
+            fn from_iter(mut iter: impl Iterator<Item = T>) -> Option<Self> {
+                Some([$(impl_array!(@replace $idx, iter.next()?) ),+])
             }
         }
     };
@@ -257,7 +257,7 @@ impl<T> Array<T> for [T; 0] {
         []
     }
 
-    fn from_iter<I: Iterator<Item = T>>(_iter: I) -> Option<Self> {
+    fn from_iter(_iter: impl Iterator<Item = T>) -> Option<Self> {
         Some([])
     }
 }
