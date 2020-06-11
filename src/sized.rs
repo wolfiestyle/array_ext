@@ -17,6 +17,7 @@ macro_rules! impl_arrayn {
 
         #[allow(unused_variables, unused_mut)]
         impl<T> $name<T> for [T; $n] {
+            #[inline]
             fn map<U, F>(self, mut f: F) -> [U; $n]
             where
                 F: FnMut(T) -> U
@@ -25,6 +26,7 @@ macro_rules! impl_arrayn {
                 [$(f($var1)),*]
             }
 
+            #[inline]
             fn zip<U, V, F>(self, other: [U; $n], mut f: F) -> [V; $n]
             where
                 F: FnMut(T, U) -> V

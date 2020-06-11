@@ -89,34 +89,47 @@ pub trait Array<T> {
 macro_rules! impl_array {
     (@do_impl $count:expr , $($var:ident $idx:expr),+) => {
         impl<T> $crate::Array<T> for [T; $count] {
+            #[inline]
             fn len(&self) -> usize { $count }
 
+            #[inline]
             fn is_empty(&self) -> bool { false }
 
+            #[inline]
             fn first(&self) -> Option<&T> { Some(&self[0]) }
 
+            #[inline]
             fn first_mut(&mut self) -> Option<&mut T> { Some(&mut self[0]) }
 
+            #[inline]
             fn last(&self) -> Option<&T> { Some(&self[$count - 1]) }
 
+            #[inline]
             fn last_mut(&mut self) -> Option<&mut T> { Some(&mut self[$count - 1]) }
 
+            #[inline]
             fn get(&self, index: usize) -> Option<&T> {
                 if index < $count { Some(&self[index]) } else { None }
             }
 
+            #[inline]
             fn get_mut(&mut self, index: usize) -> Option<&mut T> {
                 if index < $count { Some(&mut self[index]) } else { None }
             }
 
+            #[inline]
             fn as_ptr(&self) -> *const T { &self[0] }
 
+            #[inline]
             fn as_mut_ptr(&mut self) -> *mut T { &mut self[0] }
 
+            #[inline]
             fn as_slice(&self) -> &[T] { self }
 
+            #[inline]
             fn as_mut_slice(&mut self) -> &mut [T] { self }
 
+            #[inline]
             fn map_<F>(self, mut f: F) -> Self
             where
                 F: FnMut(T) -> T
@@ -125,6 +138,7 @@ macro_rules! impl_array {
                 [$( f($var) ),+]
             }
 
+            #[inline]
             fn foldl<A, F>(self, mut acc: A, mut f: F) -> A
             where
                 F: FnMut(A, T) -> A
@@ -134,6 +148,7 @@ macro_rules! impl_array {
                 acc
             }
 
+            #[inline]
             fn foldr<A, F>(self, mut acc: A, mut f: F) -> A
             where
                 F: FnMut(A, T) -> A
@@ -143,6 +158,7 @@ macro_rules! impl_array {
                 acc
             }
 
+            #[inline]
             fn from_fn<F>(mut f: F) -> Self
             where
                 F: FnMut(usize) -> T
@@ -150,6 +166,7 @@ macro_rules! impl_array {
                 [$( f($idx) ),+]
             }
 
+            #[inline]
             fn from_iter(mut iter: impl Iterator<Item = T>) -> Option<Self> {
                 Some([$(impl_array!(@replace $idx, iter.next()?) ),+])
             }
@@ -181,54 +198,67 @@ seq!(N in 1..=32 {
 
 // special case for the empty array
 impl<T> Array<T> for [T; 0] {
+    #[inline]
     fn len(&self) -> usize {
         0
     }
 
+    #[inline]
     fn is_empty(&self) -> bool {
         true
     }
 
+    #[inline]
     fn first(&self) -> Option<&T> {
         None
     }
 
+    #[inline]
     fn first_mut(&mut self) -> Option<&mut T> {
         None
     }
 
+    #[inline]
     fn last(&self) -> Option<&T> {
         None
     }
 
+    #[inline]
     fn last_mut(&mut self) -> Option<&mut T> {
         None
     }
 
+    #[inline]
     fn get(&self, _index: usize) -> Option<&T> {
         None
     }
 
+    #[inline]
     fn get_mut(&mut self, _index: usize) -> Option<&mut T> {
         None
     }
 
+    #[inline]
     fn as_ptr(&self) -> *const T {
         self as _
     }
 
+    #[inline]
     fn as_mut_ptr(&mut self) -> *mut T {
         get_mut_ptr(self)
     }
 
+    #[inline]
     fn as_slice(&self) -> &[T] {
         self
     }
 
+    #[inline]
     fn as_mut_slice(&mut self) -> &mut [T] {
         self
     }
 
+    #[inline]
     fn map_<F>(self, _f: F) -> Self
     where
         F: FnMut(T) -> T,
@@ -236,6 +266,7 @@ impl<T> Array<T> for [T; 0] {
         self
     }
 
+    #[inline]
     fn foldl<A, F>(self, acc: A, _f: F) -> A
     where
         F: FnMut(A, T) -> A,
@@ -243,6 +274,7 @@ impl<T> Array<T> for [T; 0] {
         acc
     }
 
+    #[inline]
     fn foldr<A, F>(self, acc: A, _f: F) -> A
     where
         F: FnMut(A, T) -> A,
@@ -250,6 +282,7 @@ impl<T> Array<T> for [T; 0] {
         acc
     }
 
+    #[inline]
     fn from_fn<F>(_f: F) -> Self
     where
         F: FnMut(usize) -> T,
@@ -257,12 +290,14 @@ impl<T> Array<T> for [T; 0] {
         []
     }
 
+    #[inline]
     fn from_iter(_iter: impl Iterator<Item = T>) -> Option<Self> {
         Some([])
     }
 }
 
 // workaround to not being able to cast `&mut [T; 0]` to `*mut T` directly
+#[inline]
 fn get_mut_ptr<T>(a: &mut [T; 0]) -> *mut T {
     a.as_mut_ptr()
 }
