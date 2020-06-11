@@ -70,7 +70,6 @@ pub trait Array<T> {
     /// Applies a function over the entire array (in reverse order), producing a single final value.
     fn foldr<A, F>(self, acc: A, f: F) -> A
     where
-        T: Copy,
         F: FnMut(A, T) -> A,
         Self: Sized;
 
@@ -139,9 +138,11 @@ macro_rules! impl_array {
 
             fn foldr<A, F>(self, mut acc: A, mut f: F) -> A
             where
-                T: Copy, F: FnMut(A, T) -> A
+                F: FnMut(A, T) -> A
             {
-                $( acc = f(acc, self[$count - $idx - 1]); )+ acc
+                let [$($var),*] = self;
+                impl_array!(@foldr acc, f; $($var),*;);
+                acc
             }
 
             fn from_fn<F>(mut f: F) -> Self
@@ -163,6 +164,14 @@ macro_rules! impl_array {
     };
 
     (; $($avar:ident $aidx:expr),*) => ();
+
+    (@foldr $acc:ident , $f:ident ; $head:expr $(, $tail:expr)* ; $($reversed:expr)*) => {
+        impl_array!(@foldr $acc, $f; $($tail),*; $head $($reversed)*);
+    };
+
+    (@foldr $acc:ident , $f:ident ; ; $($reversed:expr)*) => {
+        $($acc = $f($acc, $reversed);)*
+    }
 }
 
 // implement sizes from 1 to 32
@@ -236,7 +245,6 @@ impl<T> Array<T> for [T; 0] {
 
     fn foldr<A, F>(self, acc: A, _f: F) -> A
     where
-        T: Copy,
         F: FnMut(A, T) -> A,
     {
         acc
