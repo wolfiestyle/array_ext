@@ -87,8 +87,6 @@ pub trait Array<T> {
 
 // for arrays with 1+ elements
 macro_rules! impl_array {
-    (@replace $a:expr, $sub:expr) => ($sub);
-
     (@do_impl $count:expr , $($var:ident $idx:expr),+) => {
         impl<T> $crate::Array<T> for [T; $count] {
             fn len(&self) -> usize { $count }
@@ -164,6 +162,8 @@ macro_rules! impl_array {
     };
 
     (; $($avar:ident $aidx:expr),*) => ();
+
+    (@replace $a:expr, $sub:expr) => ($sub);
 
     (@foldr $acc:ident , $f:ident ; $head:expr $(, $tail:expr)* ; $($reversed:expr)*) => {
         impl_array!(@foldr $acc, $f; $($tail),*; $head $($reversed)*);
