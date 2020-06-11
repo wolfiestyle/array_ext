@@ -17,7 +17,10 @@ fn average<T: Array<f32>>(arr: T) -> f32
     arr.foldl(0.0, |acc, val| acc + val) / n
 }
 
-assert_eq!(average([8.96, 3.14, 17.9]), 10.0);
+assert!((average([8.96, 3.14, 17.9]) - 10.0).abs() < f32::EPSILON);
 ```
 
-Currently implemented for [T; N] where N: 0 to 32. It's meant to be a workaround for the lack of integer generics.
+Currently implemented for array sizes from 0 to 32, hardcoded as workaround for the lack of integer generics.
+
+The `map` and `zip` methods are provided by the sized `Array1, Array2, ...` types. The base `Array` type only
+provides a `map_` method that can do `T -> T` mapping.
