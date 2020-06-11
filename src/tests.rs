@@ -141,3 +141,17 @@ fn sum_boxed(arr: Box<dyn Array<i32>>) -> i32 {
 fn object_safe() {
     assert_eq!(sum_boxed(Box::new([1, 3, 5, 7])), 16);
 }
+
+#[test]
+fn non_copy() {
+    #[derive(Debug, Clone, PartialEq, Eq)]
+    struct Test(i32);
+
+    let arr = [Test(1), Test(2), Test(3)];
+    assert_eq!(arr.clone().map_(|a| Test(a.0 * 2)), [Test(2), Test(4), Test(6)]);
+    assert_eq!(arr.clone().map(|a| a.0 * 2), [2, 4, 6]);
+    assert_eq!(arr.clone().foldl(0, |a, n| a + n.0), 6);
+
+    let arr2 = [Test(10), Test(20), Test(30)];
+    assert_eq!(arr.zip(arr2, |a, b| a.0 + b.0), [11, 22, 33]);
+}
