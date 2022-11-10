@@ -22,5 +22,5 @@ assert!((average([8.96, 3.14, 17.9]) - 10.0).abs() < f32::EPSILON);
 Some methods, like `zip_with`, are provided by the sized `ArrayN` trait that allows doing full
 `[T; N] -> [U; N]` mapping. The base `Array` trait can only do `[T; N] -> [T; N]` mapping.
 
-This was originally made as workaround for the lack of const generics, but since v0.4 it's 
-implemented using const generics.
+This was originally made as workaround for the lack of const generics, but since v0.4 everything
+is implemented using const generics.
