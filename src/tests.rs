@@ -2,23 +2,21 @@ use super::*;
 use std::fmt::Debug;
 use std::ops::Add;
 
-fn test_empty<T: Array<i32>>(mut arr: T) {
+#[test]
+fn methods_empty() {
+    let mut arr: [i32; 0] = [];
+
     assert_eq!(arr.len(), 0);
     assert_eq!(arr.is_empty(), true);
     assert_eq!(arr.first(), None);
     assert_eq!(arr.first_mut(), None);
     assert_eq!(arr.last(), None);
     assert_eq!(arr.last_mut(), None);
-    assert_eq!(arr.get(1), None);
-    assert_eq!(arr.get_mut(1), None);
-}
-
-#[test]
-fn methods_empty() {
-    let arr: [i32; 0] = [];
-    test_empty(arr);
+    assert_eq!(arr.get(0), None);
+    assert_eq!(arr.get_mut(0), None);
     assert_eq!(arr.map_(|a| a * 2), []);
     assert_eq!(arr.foldl(0, |a, n| a + n), 0);
+    assert_eq!(arr.foldr(0, |a, n| a + n), 0);
 }
 
 fn test_arr<T: Array<V>, V: PartialEq + Debug>(mut arr: T, len: usize, mut first: V, mut last: V, mut second: V) {
@@ -104,16 +102,6 @@ fn slice() {
 
 #[test]
 fn constructors() {
-    let arr: [usize; 5] = Array::from_fn(|i| i);
-    assert_eq!(arr, [0, 1, 2, 3, 4]);
-
-    let mut n = 1;
-    let arr: [usize; 5] = Array::from_fn(|i| {
-        n *= 2;
-        i + n
-    });
-    assert_eq!(arr, [2, 5, 10, 19, 36]);
-
     let arr: [usize; 5] = Array::from_iter(1..).unwrap();
     assert_eq!(arr, [1, 2, 3, 4, 5]);
 
@@ -136,13 +124,12 @@ fn sized() {
     assert_eq!(arr.map(|s| s.len()), [3, 4, 1, 16]);
 }
 
-fn sum_boxed(arr: Box<dyn Array<i32>>) -> i32 {
-    (0..arr.len()).fold(0, |a, i| a + arr.get(i).unwrap())
-}
-
 #[test]
 fn object_safe() {
-    assert_eq!(sum_boxed(Box::new([1, 3, 5, 7])), 16);
+    let arr: Box<dyn Array<i32>> = Box::new([42, 69]);
+    assert_eq!(arr.len(), 2);
+    assert_eq!(arr.get(0), Some(&42));
+    assert_eq!(arr.last(), Some(&69));
 }
 
 #[test]

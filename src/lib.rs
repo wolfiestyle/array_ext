@@ -49,7 +49,6 @@ pub trait Array<T> {
     /// Extracts a mutable slice of the entire array.
     fn as_mut_slice(&mut self) -> &mut [T];
 
-    #[deprecated(since = "0.4.0", note = "use .map() instead")]
     /// Takes a `FnMut(T) -> T` closure and creates a new array by calling that closure on each element.
     fn map_<F>(self, f: F) -> Self
     where
