@@ -237,18 +237,29 @@ pub trait ArrayN<T, const N: usize>: Array<T> {
     /// Merges elements with another array by calling a `FnMut(T, U) -> V` closure for each pair.
     fn zip_with<U, V, F>(self, other: [U; N], f: F) -> [V; N]
     where
-        F: FnMut(T, U) -> V;
+        F: FnMut(T, U) -> V,
+        Self: Sized;
 
     /// Converts this object into it's concrete array type.
     fn downcast(self) -> [T; N];
 
+    /// Gets a reference to this object's concrete array type.
+    fn downcast_ref(&self) -> &[T; N];
+
+    /// Gets a mutable reference to this object's concrete array type.
+    fn downcast_mut(&mut self) -> &mut [T; N];
+
     /// Concatenates two arrays together.
     #[cfg(feature = "nightly")]
-    fn concat<const M: usize>(self, other: [T; M]) -> [T; N + M];
+    fn concat<const M: usize>(self, other: [T; M]) -> [T; N + M]
+    where
+        Self: Sized;
 
     /// Splits an array into two sub-arrays.
     #[cfg(feature = "nightly")]
-    fn split<const P: usize>(self) -> ([T; P], [T; N - P]);
+    fn split<const P: usize>(self) -> ([T; P], [T; N - P])
+    where
+        Self: Sized;
 }
 
 impl<T, const N: usize> ArrayN<T, N> for [T; N] {
@@ -263,6 +274,16 @@ impl<T, const N: usize> ArrayN<T, N> for [T; N] {
 
     #[inline]
     fn downcast(self) -> [T; N] {
+        self
+    }
+
+    #[inline]
+    fn downcast_ref(&self) -> &[T; N] {
+        self
+    }
+
+    #[inline]
+    fn downcast_mut(&mut self) -> &mut [T; N] {
         self
     }
 

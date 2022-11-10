@@ -138,6 +138,12 @@ fn object_safe() {
     assert_eq!(arr.len(), 2);
     assert_eq!(arr.get(0), Some(&42));
     assert_eq!(arr.last(), Some(&69));
+
+    let arrn: Box<dyn ArrayN<i32, 2>> = Box::new([42, 69]);
+    assert_eq!(arrn.len(), 2);
+    assert_eq!(arrn.get(0), Some(&42));
+    assert_eq!(arrn.last(), Some(&69));
+    assert_eq!(arrn.downcast_ref().map(|n| n + 1), [43, 70]);
 }
 
 #[test]
