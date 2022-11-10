@@ -127,7 +127,10 @@ fn sized() {
     let arr = [1, 2, 3];
     assert_eq!(arr.map(|a| a as f32 / 2.0), [0.5, 1.0, 1.5]);
     assert_eq!(arr.zip_with([30, 20, 10], |a, b| a + b), [31, 22, 13]);
-    assert_eq!(arr.zip_with(['a', 'b', 'c'], |a, b| (a, b)), [(1, 'a'), (2, 'b'), (3, 'c')]);
+    assert_eq!(
+        arr.zip_with(['a', 'b', 'c'], |a, b| (a, b)),
+        [(1, 'a'), (2, 'b'), (3, 'c')]
+    );
 
     let arr = ["foo", "asdf", "a", "very long string"];
     assert_eq!(arr.map(|s| s.len()), [3, 4, 1, 16]);

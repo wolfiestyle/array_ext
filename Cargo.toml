@@ -11,4 +11,3 @@ license = "MIT"
 edition = "2021"
 
 [dependencies]
-seq-macro = "0.1.4"
