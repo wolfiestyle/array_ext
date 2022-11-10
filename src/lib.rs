@@ -303,7 +303,7 @@ fn get_mut_ptr<T>(a: &mut [T; 0]) -> *mut T {
 }
 
 pub mod sized;
-pub use sized::*;
+pub use sized::ArrayN;
 
 #[cfg(test)]
 mod tests;
