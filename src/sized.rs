@@ -5,7 +5,7 @@ use seq_macro::seq;
 /// Array with size information on the type.
 pub trait ArrayN<T, const N: usize>: Array<T> {
     /// Merges elements with another array by calling a `FnMut(T, U) -> V` closure for each pair.
-    fn zip<U, V, F>(self, other: [U; N], f: F) -> [V; N]
+    fn zip_with<U, V, F>(self, other: [U; N], f: F) -> [V; N]
     where
         F: FnMut(T, U) -> V;
 }
@@ -15,7 +15,7 @@ macro_rules! impl_arrayn {
         #[allow(unused_variables, unused_mut)]
         impl<T> ArrayN<T, $n> for [T; $n] {
             #[inline]
-            fn zip<U, V, F>(self, other: [U; $n], mut f: F) -> [V; $n]
+            fn zip_with<U, V, F>(self, other: [U; $n], mut f: F) -> [V; $n]
             where
                 F: FnMut(T, U) -> V
             {
