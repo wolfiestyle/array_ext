@@ -239,6 +239,9 @@ pub trait ArrayN<T, const N: usize>: Array<T> {
     where
         F: FnMut(T, U) -> V;
 
+    /// Converts this object into it's concrete array type.
+    fn downcast(self) -> [T; N];
+
     /// Concatenates two arrays together.
     #[cfg(feature = "nightly")]
     fn concat<const M: usize>(self, other: [T; M]) -> [T; N + M];
@@ -256,6 +259,11 @@ impl<T, const N: usize> ArrayN<T, N> for [T; N] {
     {
         let mut b = other.into_iter();
         self.map(|a| f(a, b.next().unwrap()))
+    }
+
+    #[inline]
+    fn downcast(self) -> [T; N] {
+        self
     }
 
     #[cfg(feature = "nightly")]

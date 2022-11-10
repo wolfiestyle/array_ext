@@ -74,6 +74,12 @@ fn avg<T: Array<f32>>(arr: T) -> f32 {
     arr.foldl(0.0, |a, n| a + n) / n
 }
 
+fn join_str<T: ArrayN<i32, N>, const N: usize>(arr: T) -> String {
+    arr.downcast()
+        .map(|n| n.to_string())
+        .foldl(String::new(), |a, s| a + &s)
+}
+
 #[test]
 fn generics() {
     assert_eq!(sum([], 1), []);
@@ -84,6 +90,8 @@ fn generics() {
 
     assert_eq!(avg([3.5, 4.1, 7.0, 1.5]), 4.025);
     assert_eq!(avg([1.0, 2.0, 4.0, 8.0, 16.0, 32.0, 64.0, 128.0, 256.0, 512.0]), 102.3);
+
+    assert_eq!(join_str([1, 2, 42, 69]), "124269");
 }
 
 #[test]
