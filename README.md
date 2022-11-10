@@ -19,8 +19,8 @@ fn average<T: Array<f32>>(arr: T) -> f32
 
 assert!((average([8.96, 3.14, 17.9]) - 10.0).abs() < f32::EPSILON);
 ```
+Some methods, like `zip_with`, are provided by the sized `ArrayN` trait that allows doing full
+`[T; N] -> [U; N]` mapping. The base `Array` trait can only do `[T; N] -> [T; N]` mapping.
 
-Currently implemented for array sizes from 0 to 32, hardcoded as workaround for the lack of integer generics.
-
-The `map` and `zip` methods are provided by the sized `Array1, Array2, ...` types. The base `Array` type only
-provides a `map_` method that can do `T -> T` mapping.
+This was originally made as workaround for the lack of const generics, but since v0.4 it's 
+implemented using const generics.
