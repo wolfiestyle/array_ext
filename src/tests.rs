@@ -146,6 +146,17 @@ fn non_copy() {
     assert_eq!(arr.zip_with(arr2, |a, b| a.0 + b.0), [11, 22, 33]);
 }
 
+#[test]
+fn resize() {
+    let arr = [1, 2, 3];
+
+    assert_eq!(arr.resize(42), [1, 2, 3, 42, 42]);
+    assert_eq!(arr.resize(42), [1, 2]);
+    assert_eq!(arr.resize_with(|i| i + 1), [1, 2, 3, 4, 5, 6]);
+    assert_eq!(arr.resize::<0>(1), []);
+    assert_eq!([].resize::<3>(0), [0; 3]);
+}
+
 #[cfg(feature = "nightly")]
 #[test]
 fn concat() {

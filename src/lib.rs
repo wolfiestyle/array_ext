@@ -67,6 +67,18 @@ pub trait Array<T> {
         F: FnMut(A, T) -> A,
         Self: Sized;
 
+    /// Resizes the array, filling new spaces at the end with the specified element.
+    fn resize<const S: usize>(self, elem: T) -> [T; S]
+    where
+        T: Clone,
+        Self: Sized;
+
+    /// Resizes the array, filling new spaces at the end with the values generated from a function.
+    fn resize_with<F, const S: usize>(self, f: F) -> [T; S]
+    where
+        F: FnMut(usize) -> T,
+        Self: Sized;
+
     #[deprecated(since = "0.4.0", note = "use std::array::from_fn instead")]
     /// Creates a new array using the provided closure.
     fn from_fn<F>(f: F) -> Self
@@ -183,6 +195,23 @@ impl<T, const N: usize> Array<T> for [T; N] {
             acc = f(acc, val);
         }
         acc
+    }
+
+    #[inline]
+    fn resize<const S: usize>(self, elem: T) -> [T; S]
+    where
+        T: Clone,
+    {
+        self.resize_with(|_| elem.clone())
+    }
+
+    #[inline]
+    fn resize_with<F, const S: usize>(self, mut f: F) -> [T; S]
+    where
+        F: FnMut(usize) -> T,
+    {
+        let mut a = self.into_iter();
+        std::array::from_fn(|i| if i < N { a.next().unwrap() } else { f(i) })
     }
 
     #[inline]
