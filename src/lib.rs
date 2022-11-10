@@ -1,4 +1,5 @@
 //! Extra functionality for Rust arrays.
+#![cfg_attr(feature = "nightly", feature(generic_const_exprs))]
 
 /// Generic array type.
 ///
@@ -209,6 +210,14 @@ pub trait ArrayN<T, const N: usize>: Array<T> {
     fn zip_with<U, V, F>(self, other: [U; N], f: F) -> [V; N]
     where
         F: FnMut(T, U) -> V;
+
+    /// Concatenates two arrays together.
+    #[cfg(feature = "nightly")]
+    fn concat<const M: usize>(self, other: [T; M]) -> [T; N + M];
+
+    /// Splits an array into two sub-arrays.
+    #[cfg(feature = "nightly")]
+    fn split<const P: usize>(self) -> ([T; P], [T; N - P]);
 }
 
 impl<T, const N: usize> ArrayN<T, N> for [T; N] {
@@ -219,6 +228,21 @@ impl<T, const N: usize> ArrayN<T, N> for [T; N] {
     {
         let mut b = other.into_iter();
         self.map(|a| f(a, b.next().unwrap()))
+    }
+
+    #[cfg(feature = "nightly")]
+    fn concat<const M: usize>(self, other: [T; M]) -> [T; N + M] {
+        let mut a = self.into_iter();
+        let mut b = other.into_iter();
+        std::array::from_fn(|i| if i < N { a.next() } else { b.next() }.unwrap())
+    }
+
+    #[cfg(feature = "nightly")]
+    fn split<const P: usize>(self) -> ([T; P], [T; N - P]) {
+        let mut a = self.into_iter();
+        let l = [(); P].map(|_| a.next().unwrap());
+        let r = [(); N - P].map(|_| a.next().unwrap());
+        (l, r)
     }
 }
 

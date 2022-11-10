@@ -158,3 +158,24 @@ fn non_copy() {
     let arr2 = [Test(10), Test(20), Test(30)];
     assert_eq!(arr.zip_with(arr2, |a, b| a.0 + b.0), [11, 22, 33]);
 }
+
+#[cfg(feature = "nightly")]
+#[test]
+fn concat() {
+    let a = [11, 22, 33];
+    let b = [40, 50];
+
+    assert_eq!(a.concat(b), [11, 22, 33, 40, 50]);
+    assert_eq!(a.concat([]), a);
+    assert_eq!([].concat(b), b);
+}
+
+#[cfg(feature = "nightly")]
+#[test]
+fn split() {
+    let arr = [11, 22, 33, 40, 50];
+
+    assert_eq!(arr.split(), ([11, 22, 33], [40, 50]));
+    assert_eq!(arr.split::<0>(), ([], arr));
+    assert_eq!(arr.split::<5>(), (arr, []));
+}

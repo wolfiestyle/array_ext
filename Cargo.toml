@@ -10,4 +10,7 @@ keywords = ["array", "generic", "extension"]
 license = "MIT"
 edition = "2021"
 
+[features]
+nightly = []
+
 [dependencies]
