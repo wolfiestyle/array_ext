@@ -1,6 +1,6 @@
 [package]
 name = "array_ext"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["wolfiestyle <slayerbeast@gmail.com>"]
 description = "Extra functionality for Rust arrays"
 documentation = "https://docs.rs/array_ext"
@@ -8,7 +8,7 @@ repository = "https://github.com/wolfiestyle/array_ext"
 readme = "README.md"
 keywords = ["array", "generic", "extension"]
 license = "MIT"
-edition = "2018"
+edition = "2021"
 
 [dependencies]
 seq-macro = "0.1.4"

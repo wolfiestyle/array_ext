@@ -1,5 +1,4 @@
 //! Extra functionality for Rust arrays.
-use seq_macro::seq;
 
 /// Generic array type.
 ///
@@ -43,18 +42,13 @@ pub trait Array<T> {
     /// Returns a mutable reference to the element at the given index, or `None` if the index is out of bounds.
     fn get_mut(&mut self, index: usize) -> Option<&mut T>;
 
-    /// Returns an raw pointer to the array's buffer.
-    fn as_ptr(&self) -> *const T;
-
-    /// Returns an unsafe mutable pointer to the array's buffer.
-    fn as_mut_ptr(&mut self) -> *mut T;
-
     /// Extracts a slice containing the entire array.
     fn as_slice(&self) -> &[T];
 
     /// Extracts a mutable slice of the entire array.
     fn as_mut_slice(&mut self) -> &mut [T];
 
+    #[deprecated(since = "0.4.0", note = "use .map() instead")]
     /// Takes a `FnMut(T) -> T` closure and creates a new array by calling that closure on each element.
     fn map_<F>(self, f: F) -> Self
     where
@@ -73,6 +67,7 @@ pub trait Array<T> {
         F: FnMut(A, T) -> A,
         Self: Sized;
 
+    #[deprecated(since = "0.4.0", note = "use std::array::from_fn instead")]
     /// Creates a new array using the provided closure.
     fn from_fn<F>(f: F) -> Self
     where
@@ -85,167 +80,69 @@ pub trait Array<T> {
         Self: Sized;
 }
 
-// for arrays with 1+ elements
-macro_rules! impl_array {
-    (@do_impl $count:expr , $($var:ident $idx:expr),+) => {
-        impl<T> $crate::Array<T> for [T; $count] {
-            #[inline]
-            fn len(&self) -> usize { $count }
-
-            #[inline]
-            fn is_empty(&self) -> bool { false }
-
-            #[inline]
-            fn first(&self) -> Option<&T> { Some(&self[0]) }
-
-            #[inline]
-            fn first_mut(&mut self) -> Option<&mut T> { Some(&mut self[0]) }
-
-            #[inline]
-            fn last(&self) -> Option<&T> { Some(&self[$count - 1]) }
-
-            #[inline]
-            fn last_mut(&mut self) -> Option<&mut T> { Some(&mut self[$count - 1]) }
-
-            #[inline]
-            fn get(&self, index: usize) -> Option<&T> {
-                if index < $count { Some(&self[index]) } else { None }
-            }
-
-            #[inline]
-            fn get_mut(&mut self, index: usize) -> Option<&mut T> {
-                if index < $count { Some(&mut self[index]) } else { None }
-            }
-
-            #[inline]
-            fn as_ptr(&self) -> *const T { &self[0] }
-
-            #[inline]
-            fn as_mut_ptr(&mut self) -> *mut T { &mut self[0] }
-
-            #[inline]
-            fn as_slice(&self) -> &[T] { self }
-
-            #[inline]
-            fn as_mut_slice(&mut self) -> &mut [T] { self }
-
-            #[inline]
-            fn map_<F>(self, mut f: F) -> Self
-            where
-                F: FnMut(T) -> T
-            {
-                let [$($var),*] = self;
-                [$( f($var) ),+]
-            }
-
-            #[inline]
-            fn foldl<A, F>(self, mut acc: A, mut f: F) -> A
-            where
-                F: FnMut(A, T) -> A
-            {
-                let [$($var),*] = self;
-                $( acc = f(acc, $var); )+
-                acc
-            }
-
-            #[inline]
-            fn foldr<A, F>(self, mut acc: A, mut f: F) -> A
-            where
-                F: FnMut(A, T) -> A
-            {
-                let [$($var),*] = self;
-                impl_array!(@foldr acc, f; $($var),*;);
-                acc
-            }
-
-            #[inline]
-            fn from_fn<F>(mut f: F) -> Self
-            where
-                F: FnMut(usize) -> T
-            {
-                [$( f($idx) ),+]
-            }
-
-            #[inline]
-            fn from_iter(mut iter: impl Iterator<Item = T>) -> Option<Self> {
-                Some([$(impl_array!(@replace $idx, iter.next()?) ),+])
-            }
-        }
-    };
-
-    ($var:ident $idx:expr , $($tvar:ident $tidx:expr ,)* ; $($avar:ident $aidx:expr),*) => {
-        impl_array!(@do_impl $idx, $($avar $aidx),*);
-        impl_array!($($tvar $tidx,)* ; $($avar $aidx,)* $var $idx);
-    };
-
-    (; $($avar:ident $aidx:expr),*) => ();
-
-    (@replace $a:expr, $sub:expr) => ($sub);
-
-    (@foldr $acc:ident , $f:ident ; $head:expr $(, $tail:expr)* ; $($reversed:expr)*) => {
-        impl_array!(@foldr $acc, $f; $($tail),*; $head $($reversed)*);
-    };
-
-    (@foldr $acc:ident , $f:ident ; ; $($reversed:expr)*) => {
-        $($acc = $f($acc, $reversed);)*
-    }
-}
-
-// implement sizes from 1 to 32
-seq!(N in 1..=32 {
-    impl_array!(#(a#N N,)* ; a0 0);
-});
-
-// special case for the empty array
-impl<T> Array<T> for [T; 0] {
+impl<T, const N: usize> Array<T> for [T; N] {
     #[inline]
     fn len(&self) -> usize {
-        0
+        N
     }
 
     #[inline]
     fn is_empty(&self) -> bool {
-        true
+        N == 0
     }
 
     #[inline]
     fn first(&self) -> Option<&T> {
-        None
+        if N > 0 {
+            Some(&self[0])
+        } else {
+            None
+        }
     }
 
     #[inline]
     fn first_mut(&mut self) -> Option<&mut T> {
-        None
+        if N > 0 {
+            Some(&mut self[0])
+        } else {
+            None
+        }
     }
 
     #[inline]
     fn last(&self) -> Option<&T> {
-        None
+        if N > 0 {
+            Some(&self[N - 1])
+        } else {
+            None
+        }
     }
 
     #[inline]
     fn last_mut(&mut self) -> Option<&mut T> {
-        None
+        if N > 0 {
+            Some(&mut self[N - 1])
+        } else {
+            None
+        }
     }
 
     #[inline]
-    fn get(&self, _index: usize) -> Option<&T> {
-        None
+    fn get(&self, index: usize) -> Option<&T> {
+        if index < N {
+            Some(&self[index])
+        } else {
+            None
+        }
     }
 
     #[inline]
-    fn get_mut(&mut self, _index: usize) -> Option<&mut T> {
-        None
-    }
-
-    #[inline]
-    fn as_ptr(&self) -> *const T {
-        self as _
-    }
-
-    #[inline]
-    fn as_mut_ptr(&mut self) -> *mut T {
-        get_mut_ptr(self)
+    fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+        if index < N {
+            Some(&mut self[index])
+        } else {
+            None
+        }
     }
 
     #[inline]
@@ -259,47 +156,51 @@ impl<T> Array<T> for [T; 0] {
     }
 
     #[inline]
-    fn map_<F>(self, _f: F) -> Self
+    fn map_<F>(self, f: F) -> Self
     where
         F: FnMut(T) -> T,
     {
-        self
+        self.map(f)
     }
 
     #[inline]
-    fn foldl<A, F>(self, acc: A, _f: F) -> A
+    fn foldl<A, F>(self, mut acc: A, mut f: F) -> A
     where
         F: FnMut(A, T) -> A,
     {
+        for val in self {
+            acc = f(acc, val);
+        }
         acc
     }
 
     #[inline]
-    fn foldr<A, F>(self, acc: A, _f: F) -> A
+    fn foldr<A, F>(self, mut acc: A, mut f: F) -> A
     where
         F: FnMut(A, T) -> A,
     {
+        for val in self.into_iter().rev() {
+            acc = f(acc, val);
+        }
         acc
     }
 
     #[inline]
-    fn from_fn<F>(_f: F) -> Self
+    fn from_fn<F>(f: F) -> Self
     where
         F: FnMut(usize) -> T,
     {
-        []
+        std::array::from_fn(f)
     }
 
     #[inline]
-    fn from_iter(_iter: impl Iterator<Item = T>) -> Option<Self> {
-        Some([])
+    fn from_iter(mut iter: impl Iterator<Item = T>) -> Option<Self> {
+        let mut v = Vec::with_capacity(N); //FIXME: use try_map when it's stable
+        for _ in 0..N {
+            v.push(iter.next()?);
+        }
+        v.try_into().ok()
     }
-}
-
-// workaround to not being able to cast `&mut [T; 0]` to `*mut T` directly
-#[inline]
-fn get_mut_ptr<T>(a: &mut [T; 0]) -> *mut T {
-    a.as_mut_ptr()
 }
 
 pub mod sized;
