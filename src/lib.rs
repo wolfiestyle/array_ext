@@ -234,10 +234,10 @@ impl<T, const N: usize> Array<T> for [T; N] {
 
 /// Array with size information on the type.
 pub trait ArrayN<T, const N: usize>: Array<T> {
-    /// Merges elements with another array by calling a `FnMut(T, U) -> V` closure for each pair.
-    fn zip_with<U, V, F>(self, other: [U; N], f: F) -> [V; N]
+    /// Merges elements with another array by calling a `FnMut(T, U) -> Output` closure for each pair.
+    fn zip_with<U, Output, F>(self, other: [U; N], f: F) -> [Output; N]
     where
-        F: FnMut(T, U) -> V,
+        F: FnMut(T, U) -> Output,
         Self: Sized;
 
     /// Converts this object into it's concrete array type.
@@ -264,9 +264,9 @@ pub trait ArrayN<T, const N: usize>: Array<T> {
 
 impl<T, const N: usize> ArrayN<T, N> for [T; N] {
     #[inline]
-    fn zip_with<U, V, F>(self, other: [U; N], mut f: F) -> [V; N]
+    fn zip_with<U, Output, F>(self, other: [U; N], mut f: F) -> [Output; N]
     where
-        F: FnMut(T, U) -> V,
+        F: FnMut(T, U) -> Output,
     {
         let mut b = other.into_iter();
         self.map(|a| f(a, b.next().unwrap()))
