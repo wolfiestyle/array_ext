@@ -116,6 +116,9 @@ fn constructors() {
     let iter = (1..).filter(|n| n % 2 == 0).zip("foobar".chars());
     let arr: [(i32, char); 6] = Array::from_iter(iter).unwrap();
     assert_eq!(arr, [(2, 'f'), (4, 'o'), (6, 'o'), (8, 'b'), (10, 'a'), (12, 'r')]);
+
+    let arr: Option<[i32; 3]> = Array::from_iter(std::iter::once(1));
+    assert_eq!(arr, None);
 }
 
 #[test]

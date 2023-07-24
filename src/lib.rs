@@ -1,5 +1,5 @@
 //! Extra functionality for Rust arrays.
-#![cfg_attr(feature = "nightly", feature(generic_const_exprs))]
+#![cfg_attr(feature = "nightly", feature(generic_const_exprs, array_try_from_fn))]
 
 /// Generic array type.
 ///
@@ -224,11 +224,18 @@ impl<T, const N: usize> Array<T> for [T; N] {
 
     #[inline]
     fn from_iter(mut iter: impl Iterator<Item = T>) -> Option<Self> {
-        let mut v = Vec::with_capacity(N); //FIXME: use try_map when it's stable
-        for _ in 0..N {
-            v.push(iter.next()?);
+        #[cfg(feature = "nightly")]
+        {
+            std::array::try_from_fn(|_| iter.next())
         }
-        v.try_into().ok()
+        #[cfg(not(feature = "nightly"))]
+        {
+            let mut arr = std::array::from_fn(|_| None);
+            for item in &mut arr {
+                *item = Some(iter.next()?);
+            }
+            Some(arr.map(Option::unwrap))
+        }
     }
 }
 
