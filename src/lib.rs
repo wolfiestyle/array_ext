@@ -234,10 +234,30 @@ impl<T, const N: usize> Array<T> for [T; N] {
 
 /// Array with size information on the type.
 pub trait ArrayN<T, const N: usize>: Array<T> {
-    /// Merges elements with another array by calling a `FnMut(T, U) -> V` closure for each pair.
-    fn zip_with<U, V, F>(self, other: [U; N], f: F) -> [V; N]
+    /// Merges elements with another array by calling a `FnMut(T, U) -> Output` closure for each pair.
+    fn zip_with<U, Output, F>(self, other: [U; N], f: F) -> [Output; N]
     where
-        F: FnMut(T, U) -> V,
+        F: FnMut(T, U) -> Output,
+        Self: Sized;
+
+    /// Merges elements with another two arrays by calling a `FnMut(T, U, V) -> Output` closure for each tuple.
+    fn zip3_with<U, V, Output, F>(self, other1: [U; N], other2: [V; N], f: F) -> [Output; N]
+    where
+        F: FnMut(T, U, V) -> Output,
+        Self: Sized;
+
+    /// Merges elements with another three arrays by calling a `FnMut(T, U, V, W) -> Output` closure for each tuple.
+    fn zip4_with<U, V, W, Output, F>(self, other1: [U; N], other2: [V; N], other3: [W; N], f: F) -> [Output; N]
+    where
+        F: FnMut(T, U, V, W) -> Output,
+        Self: Sized;
+
+    /// Merges elements with another four arrays by calling a `FnMut(T, U, V, W, X) -> Output` closure for each tuple.
+    fn zip5_with<U, V, W, X, Output, F>(
+        self, other1: [U; N], other2: [V; N], other3: [W; N], other4: [X; N], f: F,
+    ) -> [Output; N]
+    where
+        F: FnMut(T, U, V, W, X) -> Output,
         Self: Sized;
 
     /// Converts this object into it's concrete array type.
@@ -264,12 +284,55 @@ pub trait ArrayN<T, const N: usize>: Array<T> {
 
 impl<T, const N: usize> ArrayN<T, N> for [T; N] {
     #[inline]
-    fn zip_with<U, V, F>(self, other: [U; N], mut f: F) -> [V; N]
+    fn zip_with<U, Output, F>(self, other: [U; N], mut f: F) -> [Output; N]
     where
-        F: FnMut(T, U) -> V,
+        F: FnMut(T, U) -> Output,
     {
         let mut b = other.into_iter();
         self.map(|a| f(a, b.next().unwrap()))
+    }
+
+    #[inline]
+    fn zip3_with<U, V, Output, F>(self, other1: [U; N], other2: [V; N], mut f: F) -> [Output; N]
+    where
+        F: FnMut(T, U, V) -> Output,
+    {
+        let mut it1 = other1.into_iter();
+        let mut it2 = other2.into_iter();
+        self.map(|x0| f(x0, it1.next().unwrap(), it2.next().unwrap()))
+    }
+
+    #[inline]
+    fn zip4_with<U, V, W, Output, F>(self, other1: [U; N], other2: [V; N], other3: [W; N], mut f: F) -> [Output; N]
+    where
+        F: FnMut(T, U, V, W) -> Output,
+    {
+        let mut it1 = other1.into_iter();
+        let mut it2 = other2.into_iter();
+        let mut it3 = other3.into_iter();
+        self.map(|x0| f(x0, it1.next().unwrap(), it2.next().unwrap(), it3.next().unwrap()))
+    }
+
+    #[inline]
+    fn zip5_with<U, V, W, X, Output, F>(
+        self, other1: [U; N], other2: [V; N], other3: [W; N], other4: [X; N], mut f: F,
+    ) -> [Output; N]
+    where
+        F: FnMut(T, U, V, W, X) -> Output,
+    {
+        let mut it1 = other1.into_iter();
+        let mut it2 = other2.into_iter();
+        let mut it3 = other3.into_iter();
+        let mut it4 = other4.into_iter();
+        self.map(|x0| {
+            f(
+                x0,
+                it1.next().unwrap(),
+                it2.next().unwrap(),
+                it3.next().unwrap(),
+                it4.next().unwrap(),
+            )
+        })
     }
 
     #[inline]

@@ -157,7 +157,30 @@ fn non_copy() {
     assert_eq!(arr.clone().foldl(0, |a, n| a + n.0), 6);
 
     let arr2 = [Test(10), Test(20), Test(30)];
-    assert_eq!(arr.zip_with(arr2, |a, b| a.0 + b.0), [11, 22, 33]);
+    assert_eq!(arr.clone().zip_with(arr2.clone(), |a, b| a.0 + b.0), [11, 22, 33]);
+
+    let arr3 = [Test(100), Test(200), Test(300)];
+    assert_eq!(
+        arr.clone()
+            .zip3_with(arr2.clone(), arr3.clone(), |a, b, c| a.0 + b.0 + c.0),
+        [111, 222, 333]
+    );
+
+    let arr4 = [Test(1000), Test(2000), Test(3000)];
+    assert_eq!(
+        arr.clone()
+            .zip4_with(arr2.clone(), arr3.clone(), arr4.clone(), |a, b, c, d| a.0
+                + b.0
+                + c.0
+                + d.0),
+        [1111, 2222, 3333]
+    );
+
+    let arr5 = [Test(10000), Test(20000), Test(30000)];
+    assert_eq!(
+        arr.zip5_with(arr2, arr3, arr4, arr5, |a, b, c, d, e| a.0 + b.0 + c.0 + d.0 + e.0),
+        [11111, 22222, 33333]
+    );
 }
 
 #[test]
