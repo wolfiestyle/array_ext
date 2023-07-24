@@ -121,15 +121,28 @@ fn constructors() {
 #[test]
 fn sized() {
     let arr = [1, 2, 3];
-    assert_eq!(arr.map(|a| a as f32 / 2.0), [0.5, 1.0, 1.5]);
-    assert_eq!(arr.zip_with([30, 20, 10], |a, b| a + b), [31, 22, 13]);
     assert_eq!(
         arr.zip_with(['a', 'b', 'c'], |a, b| (a, b)),
         [(1, 'a'), (2, 'b'), (3, 'c')]
     );
 
-    let arr = ["foo", "asdf", "a", "very long string"];
-    assert_eq!(arr.map(|s| s.len()), [3, 4, 1, 16]);
+    let arr2 = [10, 20, 30];
+    assert_eq!(arr.zip_with(arr2, |a, b| a + b), [11, 22, 33]);
+
+    let arr3 = [100, 200, 300];
+    assert_eq!(arr.zip3_with(arr2, arr3, |a, b, c| a + b + c), [111, 222, 333]);
+
+    let arr4 = [1000, 2000, 3000];
+    assert_eq!(
+        arr.zip4_with(arr2, arr3, arr4, |a, b, c, d| a + b + c + d),
+        [1111, 2222, 3333]
+    );
+
+    let arr5 = [10000, 20000, 30000];
+    assert_eq!(
+        arr.zip5_with(arr2, arr3, arr4, arr5, |a, b, c, d, e| a + b + c + d + e),
+        [11111, 22222, 33333]
+    );
 }
 
 #[test]
